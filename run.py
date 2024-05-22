@@ -4,6 +4,10 @@ import time
 import random
 import os
 from inquirer import list_input, text
+import urllib3
+
+# Disable InsecureRequestWarning
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Fungsi untuk mengirim permintaan GraphQL
 def send_graphql_request(token, account_id, stats):
@@ -11,7 +15,7 @@ def send_graphql_request(token, account_id, stats):
     nonce = os.urandom(32).hex()  # 32 bytes * 2 (hexadecimal) = 64 characters
 
     # Tentukan jumlah taps berdasarkan kondisi energi
-    taps_count = random.randint(2, 50)
+    taps_count = random.randint(20, 50)
 
     # Buat data payload sesuai dengan format yang diminta
     payload = {
@@ -39,7 +43,7 @@ def send_graphql_request(token, account_id, stats):
         'Content-Type': 'application/json'
     }
 
-    response = requests.post(url, json=payload, headers=headers)
+    response = requests.post(url, json=payload, headers=headers, verify=False)  # Mematikan verifikasi SSL
     response_data = response.json()
 
     if response.status_code == 200 and 'data' in response_data:
@@ -47,6 +51,8 @@ def send_graphql_request(token, account_id, stats):
             coins_amount = response_data['data']['telegramGameProcessTapsBatch']['coinsAmount']
             current_energy = response_data['data']['telegramGameProcessTapsBatch']['currentEnergy']
 
+            print("\n")
+            print("***************************************")
             print(f"Akun ke - {account_id}:")
             print(f"Total bacok: {taps_count} kali pukul")
             print(f"Sisa energy: {current_energy}")
@@ -83,9 +89,7 @@ print("**********************************************************************")
 print("ke inspect element - Network - klik 1x monsternya")
 print("di inspect element - Network - Pilih graphpl dan ambil Authorization")
 print("**********************************************************************")
-print("pip install requests inquirer")
-print("python run.py")
-print("**********************************************************************")
+
 option = list_input("Pilih opsi:", choices=['Token baru', 'Gunakan token yang sudah ada'])
 
 if option == 'Token baru':
